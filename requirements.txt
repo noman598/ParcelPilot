@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pandas
+openpyxl
+pdfplumber
+scikit-learn
+python-dotenv
+python-multipart
+groq
