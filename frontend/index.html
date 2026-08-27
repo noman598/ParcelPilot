@@ -3,165 +3,546 @@
 <head>
 <meta charset="UTF-8" />
 <title>ParcelPilot Support</title>
+
 <style>
-  body { font-family: system-ui, sans-serif; background: #f4f6f8; margin: 0; display: flex; justify-content: center; }
-  #app { width: 100%; max-width: 640px; padding: 20px; }
-  h1 { font-size: 18px; color: #1c2b39; }
-  #login-panel, #chat-panel { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-  #chat-panel { display: none; margin-top: 12px; }
-  select, button, input[type=text] { font-size: 14px; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
-  button { background: #2b6cb0; color: white; border: none; cursor: pointer; }
-  button:hover { background: #24578f; }
-  button.secondary { background: #a0aec0; }
-  #messages { height: 420px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: #fafbfc; }
-  .msg { margin: 8px 0; padding: 8px 12px; border-radius: 10px; max-width: 85%; white-space: pre-wrap; line-height: 1.4; font-size: 14px; }
-  .msg.user { background: #2b6cb0; color: white; margin-left: auto; }
-  .msg.assistant { background: #edf2f7; color: #1a202c; }
-  .tool-badges { margin: 4px 0; font-size: 12px; }
-  .tool-badge { display: inline-block; background: #d6e4ff; color: #1e3a8a; border-radius: 12px; padding: 2px 8px; margin-right: 4px; margin-bottom: 4px; }
-  #input-row { display: flex; gap: 8px; }
-  #input-row input { flex: 1; }
-  .pending-action { border: 1px solid #f0b429; background: #fffbea; border-radius: 8px; padding: 10px; margin: 8px 0; font-size: 14px; }
-  .pending-action button { margin-right: 8px; margin-top: 6px; }
+  body {
+    font-family: system-ui, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 640px;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 18px;
+    color: #1c2b39;
+  }
+
+  #login-panel,
+  #chat-panel {
+    background: white;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  }
+
+  #chat-panel {
+    display: none;
+    margin-top: 12px;
+  }
+
+  select,
+  button,
+  input[type=text] {
+    font-size: 14px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  button {
+    background: #2b6cb0;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #24578f;
+  }
+
+  button.secondary {
+    background: #a0aec0;
+  }
+
+  #messages {
+    height: 420px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #fafbfc;
+  }
+
+  .msg {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-radius: 10px;
+    max-width: 85%;
+    white-space: pre-wrap;
+    line-height: 1.4;
+    font-size: 14px;
+  }
+
+  .msg.user {
+    background: #2b6cb0;
+    color: white;
+    margin-left: auto;
+  }
+
+  .msg.assistant {
+    background: #edf2f7;
+    color: #1a202c;
+  }
+
+  .tool-badges {
+    margin: 4px 0;
+    font-size: 12px;
+  }
+
+  .tool-badge {
+    display: inline-block;
+    background: #d6e4ff;
+    color: #1e3a8a;
+    border-radius: 12px;
+    padding: 2px 8px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+
+  #input-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  #input-row input {
+    flex: 1;
+  }
+
+  .pending-action {
+    border: 1px solid #f0b429;
+    background: #fffbea;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 8px 0;
+    font-size: 14px;
+  }
+
+  .pending-action button {
+    margin-right: 8px;
+    margin-top: 6px;
+  }
+
+  /* Processing indicator */
+  #processing {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0;
+    font-size: 13px;
+    color: #666;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ddd;
+    border-top: 2px solid #333;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 </style>
+
 </head>
+
 <body>
+
 <div id="app">
+
   <h1>ParcelPilot Support</h1>
 
+  <!-- Login -->
   <div id="login-panel">
     <p>Select an account to simulate a logged-in customer:</p>
+
     <select id="account-select"></select>
+
     <button onclick="login()">Log in</button>
   </div>
 
+
+  <!-- Chat -->
   <div id="chat-panel">
+
     <div id="messages"></div>
+
     <div id="pending-container"></div>
-    <div id="input-row">
-      <input type="text" id="message-input" placeholder="Ask a question..." onkeydown="if(event.key==='Enter') sendMessage()" />
-      <button onclick="sendMessage()">Send</button>
+
+
+    <!-- Processing indicator -->
+    <div id="processing">
+      <span class="spinner"></span>
+      <span>Please wait a moment, I'll get that for you...</span>
     </div>
+
+
+    <!-- Input -->
+    <div id="input-row">
+
+      <input
+        type="text"
+        id="message-input"
+        placeholder="Ask a question..."
+        onkeydown="if(event.key === 'Enter') sendMessage()"
+      />
+
+      <button onclick="sendMessage()">Send</button>
+
+    </div>
+
   </div>
+
 </div>
 
+
 <script>
+
 const OLD_API_BASE = "http://localhost:8000";
 const API_BASE = "";
+
 let sessionId = null;
 
+
+/* =========================
+   LOAD ACCOUNTS
+========================= */
+
 async function loadAccounts() {
+
   const res = await fetch(`${API_BASE}/accounts`);
+
   const data = await res.json();
+
   const select = document.getElementById("account-select");
+
   select.innerHTML = "";
+
   data.accounts.forEach(acc => {
+
     const opt = document.createElement("option");
+
     opt.value = JSON.stringify(acc);
-    // Best-effort label since column names vary by real file
-    const label = acc.account_name || acc.account_id || JSON.stringify(acc);
+
+    const label =
+      acc.account_name ||
+      acc.account_id ||
+      JSON.stringify(acc);
+
     opt.textContent = label;
+
     select.appendChild(opt);
+
   });
 }
+
+
+/* =========================
+   LOGIN
+========================= */
 
 async function login() {
+
   const select = document.getElementById("account-select");
+
   const acc = JSON.parse(select.value);
+
   const res = await fetch(`${API_BASE}/login`, {
+
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
     body: JSON.stringify({
+
       account_id: acc.account_id,
+
       account_name: acc.account_name || ""
+
     })
+
   });
+
   const data = await res.json();
+
   sessionId = data.session_id;
+
   document.getElementById("login-panel").style.display = "none";
+
   document.getElementById("chat-panel").style.display = "block";
-  addMessage("assistant", "Hi! I'm the ParcelPilot support assistant. Ask me anything about your account, orders, tickets, or policies.");
+
+  addMessage(
+    "assistant",
+    "Hi! I'm the ParcelPilot support assistant. Ask me anything about your account, orders, tickets, or policies."
+  );
 }
 
+
+/* =========================
+   ADD MESSAGE
+========================= */
+
 function addMessage(role, text, toolTrace) {
+
   const messages = document.getElementById("messages");
+
+
   if (toolTrace && toolTrace.length) {
+
     const badgeDiv = document.createElement("div");
+
     badgeDiv.className = "tool-badges";
+
+
     toolTrace.forEach(t => {
+
       const badge = document.createElement("span");
+
       badge.className = "tool-badge";
+
       badge.textContent = "🔧 " + t.tool;
+
       badge.title = JSON.stringify(t.input);
+
       badgeDiv.appendChild(badge);
+
     });
+
+
     messages.appendChild(badgeDiv);
+
   }
+
+
   const div = document.createElement("div");
+
   div.className = "msg " + role;
+
   div.textContent = text;
+
   messages.appendChild(div);
+
   messages.scrollTop = messages.scrollHeight;
 }
 
+
+/* =========================
+   PENDING ACTION
+========================= */
+
 function showPendingAction(action) {
-  const container = document.getElementById("pending-container");
+
+  const container =
+    document.getElementById("pending-container");
+
   container.innerHTML = "";
+
   if (!action) return;
+
+
   const div = document.createElement("div");
+
   div.className = "pending-action";
+
+
   div.innerHTML = `
     <strong>Proposed action: Create Escalation</strong><br/>
     <b>Summary:</b> ${action.summary}<br/>
     <b>Reason:</b> ${action.reason}<br/>
-    ${action.related_order_id ? `<b>Order:</b> ${action.related_order_id}<br/>` : ""}
-    ${action.related_ticket_id ? `<b>Ticket:</b> ${action.related_ticket_id}<br/>` : ""}
+    ${
+      action.related_order_id
+        ? `<b>Order:</b> ${action.related_order_id}<br/>`
+        : ""
+    }
+    ${
+      action.related_ticket_id
+        ? `<b>Ticket:</b> ${action.related_ticket_id}<br/>`
+        : ""
+    }
   `;
+
+
   const confirmBtn = document.createElement("button");
+
   confirmBtn.textContent = "Confirm";
-  confirmBtn.onclick = () => respondToAction(true);
+
+  confirmBtn.onclick = () =>
+    respondToAction(true);
+
+
   const cancelBtn = document.createElement("button");
+
   cancelBtn.className = "secondary";
+
   cancelBtn.textContent = "Cancel";
-  cancelBtn.onclick = () => respondToAction(false);
+
+  cancelBtn.onclick = () =>
+    respondToAction(false);
+
+
   div.appendChild(confirmBtn);
+
   div.appendChild(cancelBtn);
+
   container.appendChild(div);
 }
 
+
+/* =========================
+   CONFIRM / CANCEL ACTION
+========================= */
+
 async function respondToAction(confirm) {
-  const res = await fetch(`${API_BASE}/confirm_action`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ session_id: sessionId, confirm })
-  });
+
+  const res = await fetch(
+    `${API_BASE}/confirm_action`,
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        session_id: sessionId,
+        confirm: confirm
+      })
+    }
+  );
+
+
   const data = await res.json();
-  document.getElementById("pending-container").innerHTML = "";
+
+
+  document.getElementById(
+    "pending-container"
+  ).innerHTML = "";
+
+
   if (data.status === "created") {
-    addMessage("assistant", `Done — escalation ${data.escalation.escalation_id} has been created.`);
+
+    addMessage(
+      "assistant",
+      `Done — escalation ${data.escalation.escalation_id} has been created.`
+    );
+
   } else {
-    addMessage("assistant", "Okay, I won't create that escalation.");
+
+    addMessage(
+      "assistant",
+      "Okay, I won't create that escalation."
+    );
+
   }
 }
 
+
+/* =========================
+   SEND MESSAGE
+========================= */
+
 async function sendMessage() {
-  const input = document.getElementById("message-input");
+
+  const input =
+    document.getElementById("message-input");
+
   const text = input.value.trim();
+
+
   if (!text) return;
+
+
+  // Add user's message
   addMessage("user", text);
+
+  // Clear input
   input.value = "";
 
-  const res = await fetch(`${API_BASE}/chat`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ session_id: sessionId, message: text })
-  });
-  const data = await res.json();
-  addMessage("assistant", data.reply, data.tool_trace);
-  showPendingAction(data.pending_action);
+
+  // Show processing indicator
+  document.getElementById(
+    "processing"
+  ).style.display = "flex";
+
+
+  try {
+
+    const res = await fetch(
+      `${API_BASE}/chat`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          session_id: sessionId,
+          message: text
+        })
+      }
+    );
+
+
+    const data = await res.json();
+
+
+    // Add assistant response
+    addMessage(
+      "assistant",
+      data.reply,
+      data.tool_trace
+    );
+
+
+    // Show escalation if required
+    showPendingAction(
+      data.pending_action
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    addMessage(
+      "assistant",
+      "Sorry, something went wrong. Please try again."
+    );
+
+
+  } finally {
+
+    // Hide processing indicator
+    document.getElementById(
+      "processing"
+    ).style.display = "none";
+
+  }
 }
 
+
+/* =========================
+   INITIALIZE
+========================= */
+
 loadAccounts();
+
 </script>
+
 </body>
 </html>
