@@ -408,7 +408,7 @@ def run_agent_turn(data_store, account_id: str, account_scope: str, history: lis
     pending_action = None
     called_tools = set()
 
-    MAX_ITERATIONS = 2
+    MAX_ITERATIONS = 3
 
     for iteration in range(MAX_ITERATIONS):
         response = client.chat.completions.create(
